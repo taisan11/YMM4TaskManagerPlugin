@@ -83,7 +83,7 @@
       <FilesToDelete Include="$(OutputPath)\publish\Vortice.*.dll" />
       <FilesToDelete Include="$(OutputPath)\publish\NCalc.*.dll" />
       <FilesToDelete Include="$(OutputPath)\publish\Newtonsoft.Json.dll" />
-      <FilesToDelete Include="$(OutputPath)\publish\Microsoft.*.dll" />
+      <FilesToDelete Include="$(OutputPath)\publish\Microsoft.*.dll" Exclude="$(OutputPath)\publish\Microsoft.Diagnostics.*.dll;$(OutputPath)\publish\Microsoft.Extensions.Configuration*.dll;$(OutputPath)\publish\Microsoft.Extensions.Logging.dll;$(OutputPath)\publish\Microsoft.Extensions.Options.dll;$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
       <FilesToDelete Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
       <FilesToDelete Include="$(OutputPath)\publish\WinRT.Runtime.dll" />
       <FilesToDelete Include="$(OutputPath)\publish\Parlot.dll" />
