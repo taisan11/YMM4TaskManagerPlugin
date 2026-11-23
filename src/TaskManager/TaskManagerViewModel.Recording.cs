@@ -13,6 +13,8 @@ internal sealed partial class TaskManagerViewModel
 {
     private static readonly TimeSpan ActionWindow = TimeSpan.FromSeconds(2);
     private LoadRecorder? recorder;
+    // ドッキングなどでツールが作り直されても直前の記録結果を表示する
+    private static RecordingResult? lastRecording;
     private RecordingResult? recording;
 
     public bool IsRecording
@@ -78,6 +80,7 @@ internal sealed partial class TaskManagerViewModel
         var result = recorder.Stop();
         recorder = null;
         IsRecording = false;
+        lastRecording = result;
         ApplyRecording(result);
     }
 
