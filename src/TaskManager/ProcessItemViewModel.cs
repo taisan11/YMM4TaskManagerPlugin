@@ -8,6 +8,7 @@ internal sealed class ProcessItemViewModel : Bindable, IDisposable
     private readonly Process process;
     private TimeSpan lastCpuTime;
     private DateTime lastSampleTime;
+    private readonly DateTime? startTime;
 
     public int Id { get; }
     public string Name { get; }
@@ -36,6 +37,13 @@ internal sealed class ProcessItemViewModel : Bindable, IDisposable
         Depth = depth;
         lastCpuTime = TryGetCpuTime() ?? TimeSpan.Zero;
         lastSampleTime = DateTime.UtcNow;
+        try
+        {
+            startTime = process.StartTime;
+        }
+        catch (Exception ex) when (IsProcessAccessException(ex))
+        {
+        }
     }
 
     public void Update()
@@ -67,7 +75,13 @@ internal sealed class ProcessItemViewModel : Bindable, IDisposable
         }
     }
 
-    public void Kill() => process.Kill(entireProcessTree: true);
+    public void Kill()
+    {
+        using var current = Process.GetProcessById(Id);
+        if (startTime is null || current.StartTime != startTime)
+            throw new InvalidOperationException("プロセスは既に終了しています。");
+        process.Kill(entireProcessTree: true);
+    }
 
     public void Dispose() => process.Dispose();
 
