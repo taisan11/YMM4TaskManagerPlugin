@@ -117,6 +117,7 @@
 
     <Message Text="Zip package created at: $(ZipDestination)" Importance="high" />
 
+    <RemoveDir Directories="$(YMM4_PATH)\user\plugin\$(AssemblyName)\" />
     <Unzip SourceFiles="$(MSBuildThisFileDirectory)../publish/$(ZipFileName)"
       DestinationFolder="$(YMM4_PATH)\user\plugin\$(AssemblyName)\" />
   </Target>
