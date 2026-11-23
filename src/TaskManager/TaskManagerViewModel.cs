@@ -81,8 +81,6 @@ internal sealed partial class TaskManagerViewModel : Bindable, IToolViewModel
             selfStartTime = self.StartTime;
 
         pluginMonitor = new PluginUsageMonitor(pluginCatalog);
-        if (lastRecording is not null)
-            ApplyRecording(lastRecording);
         AnalyzeHeapCommand = new ActionCommand(_ => true, _ => pluginMonitor.RequestHeapAnalysis());
         timer.Interval = TimeSpan.FromSeconds(IntervalSeconds);
         timer.Tick += (_, _) =>
@@ -129,6 +127,10 @@ internal sealed partial class TaskManagerViewModel : Bindable, IToolViewModel
     {
         if (timer.IsEnabled || IsRecording)
             return;
+        RecordingCompleted -= OnRecordingCompleted;
+        RecordingCompleted += OnRecordingCompleted;
+        if (lastRecording is not null)
+            OnRecordingCompleted(lastRecording);
         pluginMonitor.Start();
         Sample();
         timer.Start();
@@ -138,6 +140,7 @@ internal sealed partial class TaskManagerViewModel : Bindable, IToolViewModel
     {
         timer.Stop();
         pluginMonitor.Stop();
+        RecordingCompleted -= OnRecordingCompleted;
     }
 
     private void Sample()

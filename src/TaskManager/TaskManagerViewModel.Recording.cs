@@ -15,6 +15,7 @@ internal sealed partial class TaskManagerViewModel
     private LoadRecorder? recorder;
     // ドッキングなどでツールが作り直されても直前の記録結果を表示する
     private static RecordingResult? lastRecording;
+    private static event Action<RecordingResult>? RecordingCompleted;
     private RecordingResult? recording;
 
     public bool IsRecording
@@ -82,6 +83,13 @@ internal sealed partial class TaskManagerViewModel
         IsRecording = false;
         lastRecording = result;
         ApplyRecording(result);
+        RecordingCompleted?.Invoke(result);
+    }
+
+    private void OnRecordingCompleted(RecordingResult result)
+    {
+        if (!ReferenceEquals(result, recording))
+            ApplyRecording(result);
     }
 
     private void ApplyRecording(RecordingResult result)
