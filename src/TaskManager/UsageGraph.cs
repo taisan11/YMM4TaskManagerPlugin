@@ -23,6 +23,37 @@ public sealed class UsageGraph : FrameworkElement
         nameof(Stroke), typeof(Brush), typeof(UsageGraph),
         new FrameworkPropertyMetadata(Brushes.DodgerBlue, FrameworkPropertyMetadataOptions.AffectsRender));
 
+    public static readonly DependencyProperty MarkersProperty = DependencyProperty.Register(
+        nameof(Markers), typeof(IReadOnlyList<double>), typeof(UsageGraph),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public static readonly DependencyProperty HighlightMarkerProperty = DependencyProperty.Register(
+        nameof(HighlightMarker), typeof(double), typeof(UsageGraph),
+        new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
+        nameof(Label), typeof(string), typeof(UsageGraph),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    /// <summary>操作などを示す縦線の位置 (サンプル番号)</summary>
+    public IReadOnlyList<double>? Markers
+    {
+        get => (IReadOnlyList<double>?)GetValue(MarkersProperty);
+        set => SetValue(MarkersProperty, value);
+    }
+
+    public double HighlightMarker
+    {
+        get => (double)GetValue(HighlightMarkerProperty);
+        set => SetValue(HighlightMarkerProperty, value);
+    }
+
+    public string? Label
+    {
+        get => (string?)GetValue(LabelProperty);
+        set => SetValue(LabelProperty, value);
+    }
+
     public IReadOnlyList<double>? Values
     {
         get => (IReadOnlyList<double>?)GetValue(ValuesProperty);
@@ -110,10 +141,33 @@ public sealed class UsageGraph : FrameworkElement
             dc.DrawGeometry(null, new Pen(stroke, 1.5), line);
         }
 
+        var markers = Markers;
+        if (markers is { Count: > 0 })
+        {
+            var capacity = Math.Max(2, Capacity);
+            var step = width / (capacity - 1);
+            var startX = width - (((values?.Count ?? capacity) - 1) * step);
+            var markerPen = new Pen(new SolidColorBrush(Color.FromArgb(0x90, 0xE6, 0x7E, 0x22)), 1);
+            markerPen.Freeze();
+            foreach (var marker in markers)
+            {
+                var x = Math.Round(startX + (marker * step)) + 0.5;
+                dc.DrawLine(markerPen, new Point(x, 0), new Point(x, height));
+            }
+        }
+        if (!double.IsNaN(HighlightMarker))
+        {
+            var capacity = Math.Max(2, Capacity);
+            var step = width / (capacity - 1);
+            var startX = width - (((values?.Count ?? capacity) - 1) * step);
+            var x = Math.Round(startX + (HighlightMarker * step)) + 0.5;
+            dc.DrawLine(new Pen(Brushes.OrangeRed, 2), new Point(x, 0), new Point(x, height));
+        }
+
         dc.DrawRectangle(null, borderPen, new Rect(0.5, 0.5, Math.Max(0, width - 1), Math.Max(0, height - 1)));
 
         var label = new FormattedText(
-            $"{Capacity}サンプル", CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
+            Label ?? $"{Capacity}サンプル", CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
             new Typeface("Yu Gothic UI"), 10, stroke, VisualTreeHelper.GetDpi(this).PixelsPerDip);
         dc.DrawText(label, new Point(4, height - label.Height - 2));
     }

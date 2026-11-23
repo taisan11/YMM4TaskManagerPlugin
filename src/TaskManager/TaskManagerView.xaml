@@ -23,7 +23,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,6" LastChildFill="False">
+        <DockPanel Grid.Row="0" Margin="0,0,0,6" LastChildFill="False" Visibility="{Binding NormalVisibility}">
             <Button DockPanel.Dock="Left" Padding="8,2" Content="{Binding PauseButtonText}" Command="{Binding TogglePauseCommand}" />
             <Button DockPanel.Dock="Left" Padding="8,2" Margin="4,0,0,0" Content="今すぐ更新" Command="{Binding RefreshCommand}" />
             <Button DockPanel.Dock="Left" Padding="8,2" Margin="4,0,0,0" Content="GC実行" Command="{Binding CollectGarbageCommand}"
@@ -34,13 +34,15 @@
             <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Opacity="0.6" Text="{Binding LastUpdatedText}" />
         </DockPanel>
 
-        <TabControl Grid.Row="1">
+        <TabControl Grid.Row="1" Visibility="{Binding NormalVisibility}">
             <TabItem Header="概要">
                 <Grid Margin="0,6,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" MinHeight="80" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="1.2*" MinHeight="80" />
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
@@ -119,33 +121,33 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </DockPanel>
-                </Grid>
-            </TabItem>
-            <TabItem Header="プラグイン">
-                <DockPanel Margin="0,6,0,0">
-                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
-                        <Button DockPanel.Dock="Right" Padding="8,1" Content="ヒープを今すぐ解析" Command="{Binding AnalyzeHeapCommand}" />
-                        <TextBlock VerticalAlignment="Center" Opacity="0.7" TextTrimming="CharacterEllipsis">
-                            <Run Text="{Binding PluginStatusText, Mode=OneWay}" /><Run Text="   " /><Run Text="{Binding HeapStatusText, Mode=OneWay}" />
-                        </TextBlock>
+                    <GridSplitter Grid.Row="3" Height="6" HorizontalAlignment="Stretch" Background="Transparent" />
+                    <DockPanel Grid.Row="4">
+                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,2">
+                            <TextBlock DockPanel.Dock="Left" Margin="0,0,8,0" VerticalAlignment="Center" FontWeight="Bold" Text="プラグイン" />
+                            <Button DockPanel.Dock="Right" Padding="8,1" Content="ヒープを今すぐ解析" Command="{Binding AnalyzeHeapCommand}" />
+                            <TextBlock VerticalAlignment="Center" Opacity="0.7" TextTrimming="CharacterEllipsis">
+                                <Run Text="{Binding PluginStatusText, Mode=OneWay}" /><Run Text="   " /><Run Text="{Binding HeapStatusText, Mode=OneWay}" />
+                            </TextBlock>
+                        </DockPanel>
+                        <TextBlock DockPanel.Dock="Bottom" Margin="0,4,0,0" Opacity="0.6" TextWrapping="Wrap"
+                                   Text="CPUは0.5秒ごとに各スレッドのスタックを調べ、実行中のプラグインに消費時間を割り当てた推定値です。メモリはプラグインのアセンブリで定義された型のインスタンス(配列を含む)の合計です。" />
+                        <DataGrid ItemsSource="{Binding Plugins}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                                  GridLinesVisibility="None" RowHeaderWidth="0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="名前" Binding="{Binding Name}" Width="2*" />
+                                <DataGridTextColumn Header="種類" Binding="{Binding Kind}" Width="Auto" />
+                                <DataGridTextColumn Header="CPU" Binding="{Binding CpuUsageText}" SortMemberPath="CpuUsage" Width="Auto" />
+                                <DataGridTextColumn Header="CPU時間" Binding="{Binding CpuTimeText}" SortMemberPath="CpuTime" Width="Auto" />
+                                <DataGridTextColumn Header="メモリ" Binding="{Binding HeapText}" SortMemberPath="HeapBytes" Width="Auto" />
+                                <DataGridTextColumn Header="オブジェクト" Binding="{Binding Objects, StringFormat=N0}" SortMemberPath="Objects" Width="Auto" />
+                                <DataGridTextColumn Header="スレッド" Binding="{Binding Threads}" Width="Auto" />
+                                <DataGridTextColumn Header="DLL" Binding="{Binding Assemblies}" Width="Auto" />
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </DockPanel>
-                    <TextBlock DockPanel.Dock="Bottom" Margin="0,4,0,0" Opacity="0.6" TextWrapping="Wrap"
-                               Text="CPUは0.5秒ごとに各スレッドのスタックを調べ、実行中のプラグインに消費時間を割り当てた推定値です。メモリはプラグインのアセンブリで定義された型のインスタンス(配列を含む)の合計です。" />
-                    <DataGrid ItemsSource="{Binding Plugins}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
-                              CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
-                              GridLinesVisibility="None" RowHeaderWidth="0">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="名前" Binding="{Binding Name}" Width="2*" />
-                            <DataGridTextColumn Header="種類" Binding="{Binding Kind}" Width="Auto" />
-                            <DataGridTextColumn Header="CPU" Binding="{Binding CpuUsageText}" SortMemberPath="CpuUsage" Width="Auto" />
-                            <DataGridTextColumn Header="CPU時間" Binding="{Binding CpuTimeText}" SortMemberPath="CpuTime" Width="Auto" />
-                            <DataGridTextColumn Header="メモリ" Binding="{Binding HeapText}" SortMemberPath="HeapBytes" Width="Auto" />
-                            <DataGridTextColumn Header="オブジェクト" Binding="{Binding Objects, StringFormat=N0}" SortMemberPath="Objects" Width="Auto" />
-                            <DataGridTextColumn Header="スレッド" Binding="{Binding Threads}" Width="Auto" />
-                            <DataGridTextColumn Header="DLL" Binding="{Binding Assemblies}" Width="Auto" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </DockPanel>
+                </Grid>
             </TabItem>
             <TabItem Header="GPU">
                 <DockPanel Margin="0,6,0,0">
@@ -198,6 +200,70 @@
                     </DataGrid>
                 </DockPanel>
             </TabItem>
+            <TabItem Header="記録">
+                <DockPanel Margin="0,6,0,0">
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+                        <Button DockPanel.Dock="Left" Padding="10,2" Content="● 記録開始" Command="{Binding StartRecordingCommand}" />
+                        <Button DockPanel.Dock="Left" Padding="8,2" Margin="4,0,0,0" Content="CSVで保存" Command="{Binding ExportRecordingCommand}" />
+                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Opacity="0.7" TextWrapping="Wrap"
+                                   Text="記録中は影響を減らすため、このツールの更新を止めて終了ボタンだけを表示します。クリック・ボタン・メニュー・ショートカットを記録し、文字入力は記録しません。" />
+                    </DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Margin="0,2,0,6" FontWeight="Bold" TextWrapping="Wrap" Text="{Binding RecordingSummaryText}" />
+                    <Grid DockPanel.Dock="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <DockPanel Grid.Row="0" Grid.Column="0">
+                            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Text="CPU (YMM4 / システム全体)" />
+                            <Grid Height="80" Margin="0,2,0,6">
+                                <local:UsageGraph Values="{Binding RecordingSystemCpu}" Capacity="{Binding RecordingCapacity}" Maximum="100" Stroke="#8090A0B0" Label=" " />
+                                <local:UsageGraph Values="{Binding RecordingCpu}" Capacity="{Binding RecordingCapacity}" Maximum="100" Stroke="#FF1E90FF"
+                                                  Markers="{Binding RecordingMarkers}" HighlightMarker="{Binding RecordingHighlight}" Label="{Binding RecordingGraphLabel}" />
+                            </Grid>
+                        </DockPanel>
+                        <DockPanel Grid.Row="0" Grid.Column="2">
+                            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Text="メモリ (YMM4)" />
+                            <local:UsageGraph Height="80" Margin="0,2,0,6" Values="{Binding RecordingMemory}" Capacity="{Binding RecordingCapacity}"
+                                              Maximum="{Binding RecordingMemoryMaximum}" Stroke="#FF9B59B6"
+                                              Markers="{Binding RecordingMarkers}" HighlightMarker="{Binding RecordingHighlight}" Label="{Binding RecordingGraphLabel}" />
+                        </DockPanel>
+                        <DockPanel Grid.Row="1" Grid.Column="0">
+                            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Text="GPU (YMM4)" />
+                            <local:UsageGraph Height="80" Margin="0,2,0,6" Values="{Binding RecordingGpu}" Capacity="{Binding RecordingCapacity}"
+                                              Maximum="100" Stroke="#FF2ECC71"
+                                              Markers="{Binding RecordingMarkers}" HighlightMarker="{Binding RecordingHighlight}" Label="{Binding RecordingGraphLabel}" />
+                        </DockPanel>
+                        <DockPanel Grid.Row="1" Grid.Column="2">
+                            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Text="UI応答遅延" />
+                            <local:UsageGraph Height="80" Margin="0,2,0,6" Values="{Binding RecordingLatency}" Capacity="{Binding RecordingCapacity}"
+                                              Maximum="{Binding RecordingLatencyMaximum}" Stroke="#FFE74C3C"
+                                              Markers="{Binding RecordingMarkers}" HighlightMarker="{Binding RecordingHighlight}" Label="{Binding RecordingGraphLabel}" />
+                        </DockPanel>
+                    </Grid>
+                    <TextBlock DockPanel.Dock="Top" Margin="0,2,0,2" FontWeight="Bold" Text="操作 (選択するとグラフに赤線で表示)" />
+                    <DataGrid ItemsSource="{Binding RecordedActions}" SelectedItem="{Binding SelectedRecordedAction}"
+                              AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" SelectionMode="Single"
+                              GridLinesVisibility="None" RowHeaderWidth="0" CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="時刻" Binding="{Binding TimeText}" Width="Auto" />
+                            <DataGridTextColumn Header="操作" Binding="{Binding Kind}" Width="Auto" />
+                            <DataGridTextColumn Header="対象" Binding="{Binding Target}" Width="2*" />
+                            <DataGridTextColumn Header="直後2秒のCPU 平均/最大" Binding="{Binding AfterCpuText}" SortMemberPath="AfterCpuMax" Width="Auto" />
+                            <DataGridTextColumn Header="UI遅延" Binding="{Binding AfterLatencyText}" SortMemberPath="AfterLatencyMax" Width="Auto" />
+                            <DataGridTextColumn Header="ウィンドウ" Binding="{Binding Window}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
         </TabControl>
+
+        <Button Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24,10" FontSize="16"
+                Content="■ 記録を終了" Command="{Binding StopRecordingCommand}" Visibility="{Binding RecordingVisibility}" />
     </Grid>
 </UserControl>

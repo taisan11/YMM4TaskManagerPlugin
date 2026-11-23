@@ -125,7 +125,7 @@ internal sealed partial class TaskManagerViewModel : Bindable, IToolViewModel
 
     public void Start()
     {
-        if (timer.IsEnabled)
+        if (timer.IsEnabled || IsRecording)
             return;
         pluginMonitor.Start();
         Sample();
