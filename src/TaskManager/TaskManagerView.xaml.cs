@@ -8,12 +8,18 @@ public partial class TaskManagerView : UserControl
     {
         InitializeComponent();
         Loaded += (_, _) => (DataContext as TaskManagerViewModel)?.Start();
-        Unloaded += (_, _) => (DataContext as TaskManagerViewModel)?.Stop();
+        Unloaded += (_, _) => Detach(DataContext as TaskManagerViewModel);
         DataContextChanged += (_, e) =>
         {
-            (e.OldValue as TaskManagerViewModel)?.Stop();
+            Detach(e.OldValue as TaskManagerViewModel);
             if (IsLoaded)
                 (e.NewValue as TaskManagerViewModel)?.Start();
         };
+    }
+
+    private static void Detach(TaskManagerViewModel? viewModel)
+    {
+        viewModel?.EndRecording();
+        viewModel?.Stop();
     }
 }

@@ -67,13 +67,18 @@ internal sealed partial class TaskManagerViewModel
 
     private void StopRecording()
     {
+        EndRecording();
+        Start();
+    }
+
+    public void EndRecording()
+    {
         if (recorder is null)
             return;
         var result = recorder.Stop();
         recorder = null;
         IsRecording = false;
         ApplyRecording(result);
-        Start();
     }
 
     private void ApplyRecording(RecordingResult result)
