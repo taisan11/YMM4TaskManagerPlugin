@@ -143,6 +143,12 @@ internal sealed partial class TaskManagerViewModel
                 $"{s.Time.TotalSeconds:0.000},{s.Cpu:0.00},{s.SystemCpu:0.00},{s.PrivateBytes},{s.ManagedBytes},{s.Gpu:0.00},{s.GpuDedicated},{s.UiLatencyMs:0.0},\"{actionText}\""));
             previous = s.Time;
         }
+        var rest = result.Actions.Where(a => a.Time > previous).Select(a => $"{a.Kind}: {a.Target}").ToList();
+        if (rest.Count > 0)
+        {
+            var actionText = string.Join(" / ", rest).Replace("\"", "\"\"", StringComparison.Ordinal);
+            builder.AppendLine(string.Create(CultureInfo.InvariantCulture, $"{result.Duration.TotalSeconds:0.000},,,,,,,,\"{actionText}\""));
+        }
         File.WriteAllText(dialog.FileName, builder.ToString(), new UTF8Encoding(true));
     }
 }
