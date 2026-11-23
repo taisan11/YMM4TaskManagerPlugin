@@ -103,7 +103,7 @@ internal sealed partial class GpuMonitor
             {
                 var used = adapterMemory.GetValueOrDefault(a.Key);
                 var self = selfMemory.GetValueOrDefault(a.Key);
-                var utilization = systemPerEngine.Where(x => x.Key.Luid == a.Key).Select(x => x.Value).DefaultIfEmpty(0).Max();
+                var utilization = systemPerEngine.Where(x => string.Equals(x.Key.Luid, a.Key, StringComparison.OrdinalIgnoreCase)).Select(x => x.Value).DefaultIfEmpty(0).Max();
                 return new GpuAdapterUsage(a.Value.Name, a.Value.Dedicated, used.Dedicated, used.Shared, self.Dedicated, self.Shared, Math.Min(100, utilization));
             })
             .ToList();
@@ -120,7 +120,7 @@ internal sealed partial class GpuMonitor
 
     private static Dictionary<string, (ulong Dedicated, ulong Shared)> ReadMemory(string category, string? prefix)
     {
-        var result = new Dictionary<string, (ulong Dedicated, ulong Shared)>();
+        var result = new Dictionary<string, (ulong Dedicated, ulong Shared)>(StringComparer.OrdinalIgnoreCase);
         var data = new PerformanceCounterCategory(category).ReadCategory();
         var dedicated = data["Dedicated Usage"];
         var shared = data["Shared Usage"];
