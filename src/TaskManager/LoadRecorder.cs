@@ -155,6 +155,9 @@ internal sealed class LoadRecorder
         var modifiers = Keyboard.Modifiers;
         var focused = Keyboard.FocusedElement as DependencyObject;
         var isTextInput = focused is TextBoxBase or PasswordBox || (focused is ComboBox { IsEditable: true });
+        // AltGr は Ctrl+Alt として届くため、文字入力欄では Ctrl+Alt を記録しない
+        if (focused is PasswordBox || (isTextInput && (modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt)))
+            return;
         var isShortcut = (modifiers & (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Windows)) != 0
             || key is >= Key.F1 and <= Key.F24
             || (!isTextInput && key is Key.Space or Key.Delete or Key.Escape or Key.Enter or Key.Left or Key.Right or Key.Up or Key.Down
