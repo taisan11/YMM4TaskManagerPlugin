@@ -34,6 +34,7 @@ internal sealed class LoadRecorder
     private Thread? worker;
     private long probeStarted;
     private double lastLatencyMs;
+    private TimeSpan inputTime;
 
     public LoadRecorder(Dispatcher dispatcher)
     {
@@ -43,6 +44,7 @@ internal sealed class LoadRecorder
     public void Start()
     {
         stopwatch.Start();
+        InputManager.Current.PreProcessInput += OnPreProcessInput;
         InputManager.Current.PostProcessInput += OnPostProcessInput;
         worker = new Thread(Run) { IsBackground = true, Name = "YMM4TaskManager LoadRecorder", Priority = ThreadPriority.BelowNormal };
         worker.Start();
@@ -50,6 +52,7 @@ internal sealed class LoadRecorder
 
     public RecordingResult Stop()
     {
+        InputManager.Current.PreProcessInput -= OnPreProcessInput;
         InputManager.Current.PostProcessInput -= OnPostProcessInput;
         cts.Cancel();
         worker?.Join(TimeSpan.FromSeconds(3));
@@ -111,6 +114,14 @@ internal sealed class LoadRecorder
             Interlocked.Exchange(ref probeStarted, 0);
         });
         return latency;
+    }
+
+    // 操作の時刻はハンドラが処理する前に取る
+    private void OnPreProcessInput(object sender, PreProcessInputEventArgs e)
+    {
+        var routed = e.StagingItem.Input.RoutedEvent;
+        if (routed == Mouse.PreviewMouseDownEvent || routed == Keyboard.PreviewKeyDownEvent)
+            inputTime = stopwatch.Elapsed;
     }
 
     // KeyDown/MouseDown は Preview が処理済みだと発生しないため Preview を記録する
@@ -180,7 +191,7 @@ internal sealed class LoadRecorder
         var window = source is null ? null : Window.GetWindow(source);
         var title = (window ?? Application.Current?.MainWindow)?.Title ?? string.Empty;
         lock (samples)
-            actions.Add(new RecordedAction(stopwatch.Elapsed, kind, target, title));
+            actions.Add(new RecordedAction(inputTime, kind, target, title));
     }
 
     private static (string? Kind, string Target) Describe(DependencyObject source)
