@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- プラグインに便利な設定を読み込む -->
+  <Import Project="../../buildprops/Ymm4Plugin.Build.props" />
+  <PropertyGroup>
+    <AssemblyName>YMM4TaskManagerPlugin</AssemblyName>
+    <RootNamespace>taisan11.TaskManager</RootNamespace>
+  </PropertyGroup>
+
+</Project>

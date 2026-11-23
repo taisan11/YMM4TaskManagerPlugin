@@ -1,0 +1,117 @@
+<UserControl x:Class="taisan11.TaskManager.TaskManagerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:taisan11.TaskManager"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="520"
+             d:DataContext="{d:DesignInstance Type={x:Type local:TaskManagerViewModel}}">
+    <UserControl.Resources>
+        <Style x:Key="CaptionText" TargetType="TextBlock">
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="Margin" Value="0,2,12,2" />
+        </Style>
+        <Style x:Key="ValueText" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,2,12,2" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+    </UserControl.Resources>
+    <Grid Margin="6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="80" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,6" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Padding="8,2" Content="{Binding PauseButtonText}" Command="{Binding TogglePauseCommand}" />
+            <Button DockPanel.Dock="Left" Padding="8,2" Margin="4,0,0,0" Content="今すぐ更新" Command="{Binding RefreshCommand}" />
+            <Button DockPanel.Dock="Left" Padding="8,2" Margin="4,0,0,0" Content="GC実行" Command="{Binding CollectGarbageCommand}"
+                    ToolTip="マネージドヒープのガベージコレクションを強制実行します" />
+            <TextBlock DockPanel.Dock="Left" Margin="12,0,4,0" VerticalAlignment="Center" Text="更新間隔" />
+            <ComboBox DockPanel.Dock="Left" MinWidth="64" ItemsSource="{Binding IntervalOptions}" SelectedItem="{Binding IntervalSeconds}"
+                      ItemStringFormat="{}{0} 秒" />
+            <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Opacity="0.6" Text="{Binding LastUpdatedText}" />
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Column="0">
+                <DockPanel DockPanel.Dock="Top">
+                    <TextBlock FontWeight="Bold" Text="CPU (YMM4)" />
+                    <TextBlock HorizontalAlignment="Right" Text="{Binding CpuText}" />
+                </DockPanel>
+                <TextBlock DockPanel.Dock="Bottom" Opacity="0.7" Text="{Binding SystemCpuText, StringFormat=システム全体 {0}}" />
+                <Grid Height="90" Margin="0,2">
+                    <local:UsageGraph Values="{Binding SystemCpuHistory}" Capacity="{Binding GraphCapacity}" Maximum="100" Stroke="#8090A0B0" />
+                    <local:UsageGraph Values="{Binding CpuHistory}" Capacity="{Binding GraphCapacity}" Maximum="100" Stroke="#FF1E90FF" />
+                </Grid>
+            </DockPanel>
+            <DockPanel Grid.Column="2">
+                <DockPanel DockPanel.Dock="Top">
+                    <TextBlock FontWeight="Bold" Text="メモリ (YMM4)" />
+                </DockPanel>
+                <TextBlock DockPanel.Dock="Bottom" Opacity="0.7" TextTrimming="CharacterEllipsis" Text="{Binding SystemMemoryText, StringFormat=システム全体 {0}}" />
+                <local:UsageGraph Height="90" Margin="0,2" Values="{Binding MemoryHistory}" Capacity="{Binding GraphCapacity}"
+                                  Maximum="{Binding MemoryGraphMaximum}" Stroke="#FF9B59B6" />
+            </DockPanel>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0,8,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource CaptionText}" Text="メモリ" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding MemoryText}" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource CaptionText}" Text="マネージド" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding ManagedHeapText}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource CaptionText}" Text="GC回数" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding GcCountText}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource CaptionText}" Text="スレッド" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource ValueText}">
+                <Run Text="{Binding ThreadText, Mode=OneWay}" /><Run Text="  ハンドル " /><Run Text="{Binding HandleText, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource CaptionText}" Text="稼働時間" />
+            <TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource ValueText}">
+                <Run Text="{Binding UptimeText, Mode=OneWay}" /><Run Text="  DLL " /><Run Text="{Binding AssemblyText, Mode=OneWay}" />
+            </TextBlock>
+        </Grid>
+
+        <DockPanel Grid.Row="3">
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,2">
+                <TextBlock FontWeight="Bold" Text="プロセス" />
+                <TextBlock Margin="6,0,0,0" Opacity="0.7" Text="{Binding ChildProcessText, StringFormat=(子プロセス {0} 個)}" />
+                <Button HorizontalAlignment="Right" Padding="8,1" Content="選択したプロセスを終了"
+                        Command="{Binding KillProcessCommand}" CommandParameter="{Binding SelectedProcess}" />
+            </DockPanel>
+            <DataGrid ItemsSource="{Binding Processes}" SelectedItem="{Binding SelectedProcess}"
+                      AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      GridLinesVisibility="None" RowHeaderWidth="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="名前" Binding="{Binding DisplayName}" Width="2*" />
+                    <DataGridTextColumn Header="PID" Binding="{Binding Id}" Width="Auto" />
+                    <DataGridTextColumn Header="CPU" Binding="{Binding CpuUsageText}" Width="Auto" />
+                    <DataGridTextColumn Header="メモリ" Binding="{Binding PrivateBytesText}" Width="Auto" />
+                    <DataGridTextColumn Header="スレッド" Binding="{Binding Threads}" Width="Auto" />
+                    <DataGridTextColumn Header="種類" Binding="{Binding Kind}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Grid>
+</UserControl>
