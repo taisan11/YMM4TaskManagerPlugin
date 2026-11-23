@@ -65,6 +65,7 @@ internal sealed partial class TaskManagerViewModel : Bindable, IToolViewModel
         {
             if (Set(ref field, value))
                 OnPropertyChanged(nameof(PauseButtonText));
+            pluginMonitor.IsPaused = value;
         }
     }
     public string PauseButtonText => IsPaused ? "▶ 再開" : "❚❚ 一時停止";
@@ -79,6 +80,8 @@ internal sealed partial class TaskManagerViewModel : Bindable, IToolViewModel
         using (var self = Process.GetCurrentProcess())
             selfStartTime = self.StartTime;
 
+        pluginMonitor = new PluginUsageMonitor(pluginCatalog);
+        AnalyzeHeapCommand = new ActionCommand(_ => true, _ => pluginMonitor.RequestHeapAnalysis());
         timer.Interval = TimeSpan.FromSeconds(IntervalSeconds);
         timer.Tick += (_, _) =>
         {
@@ -124,11 +127,16 @@ internal sealed partial class TaskManagerViewModel : Bindable, IToolViewModel
     {
         if (timer.IsEnabled)
             return;
+        pluginMonitor.Start();
         Sample();
         timer.Start();
     }
 
-    public void Stop() => timer.Stop();
+    public void Stop()
+    {
+        timer.Stop();
+        pluginMonitor.Stop();
+    }
 
     private void Sample()
     {
@@ -175,6 +183,8 @@ internal sealed partial class TaskManagerViewModel : Bindable, IToolViewModel
         var uptime = DateTime.Now - selfStartTime;
         UptimeText = $"{(int)uptime.TotalHours:00}:{uptime.Minutes:00}:{uptime.Seconds:00}";
         ChildProcessText = Math.Max(0, Processes.Count - 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        UpdatePlugins();
+        UpdateGpu();
         LastUpdatedText = $"最終更新 {DateTime.Now:HH:mm:ss}";
     }
 

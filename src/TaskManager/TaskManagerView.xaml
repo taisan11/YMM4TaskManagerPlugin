@@ -20,9 +20,7 @@
     <Grid Margin="6">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" MinHeight="80" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Margin="0,0,0,6" LastChildFill="False">
@@ -36,82 +34,170 @@
             <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Opacity="0.6" Text="{Binding LastUpdatedText}" />
         </DockPanel>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <DockPanel Grid.Column="0">
-                <DockPanel DockPanel.Dock="Top">
-                    <TextBlock FontWeight="Bold" Text="CPU (YMM4)" />
-                    <TextBlock HorizontalAlignment="Right" Text="{Binding CpuText}" />
-                </DockPanel>
-                <TextBlock DockPanel.Dock="Bottom" Opacity="0.7" Text="{Binding SystemCpuText, StringFormat=システム全体 {0}}" />
-                <Grid Height="90" Margin="0,2">
-                    <local:UsageGraph Values="{Binding SystemCpuHistory}" Capacity="{Binding GraphCapacity}" Maximum="100" Stroke="#8090A0B0" />
-                    <local:UsageGraph Values="{Binding CpuHistory}" Capacity="{Binding GraphCapacity}" Maximum="100" Stroke="#FF1E90FF" />
+        <TabControl Grid.Row="1">
+            <TabItem Header="概要">
+                <Grid Margin="0,6,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" MinHeight="80" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <DockPanel Grid.Column="0">
+                            <DockPanel DockPanel.Dock="Top">
+                                <TextBlock FontWeight="Bold" Text="CPU (YMM4)" />
+                                <TextBlock HorizontalAlignment="Right" Text="{Binding CpuText}" />
+                            </DockPanel>
+                            <TextBlock DockPanel.Dock="Bottom" Opacity="0.7" Text="{Binding SystemCpuText, StringFormat=システム全体 {0}}" />
+                            <Grid Height="90" Margin="0,2">
+                                <local:UsageGraph Values="{Binding SystemCpuHistory}" Capacity="{Binding GraphCapacity}" Maximum="100" Stroke="#8090A0B0" />
+                                <local:UsageGraph Values="{Binding CpuHistory}" Capacity="{Binding GraphCapacity}" Maximum="100" Stroke="#FF1E90FF" />
+                            </Grid>
+                        </DockPanel>
+                        <DockPanel Grid.Column="2">
+                            <DockPanel DockPanel.Dock="Top">
+                                <TextBlock FontWeight="Bold" Text="メモリ (YMM4)" />
+                            </DockPanel>
+                            <TextBlock DockPanel.Dock="Bottom" Opacity="0.7" TextTrimming="CharacterEllipsis" Text="{Binding SystemMemoryText, StringFormat=システム全体 {0}}" />
+                            <local:UsageGraph Height="90" Margin="0,2" Values="{Binding MemoryHistory}" Capacity="{Binding GraphCapacity}"
+                                              Maximum="{Binding MemoryGraphMaximum}" Stroke="#FF9B59B6" />
+                        </DockPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource CaptionText}" Text="メモリ" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding MemoryText}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource CaptionText}" Text="マネージド" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding ManagedHeapText}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource CaptionText}" Text="GC回数" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding GcCountText}" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource CaptionText}" Text="スレッド" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource ValueText}">
+                            <Run Text="{Binding ThreadText, Mode=OneWay}" /><Run Text="  ハンドル " /><Run Text="{Binding HandleText, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource CaptionText}" Text="稼働時間" />
+                        <TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource ValueText}">
+                            <Run Text="{Binding UptimeText, Mode=OneWay}" /><Run Text="  DLL " /><Run Text="{Binding AssemblyText, Mode=OneWay}" />
+                        </TextBlock>
+                    </Grid>
+
+                    <DockPanel Grid.Row="2">
+                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,2">
+                            <TextBlock FontWeight="Bold" Text="プロセス" />
+                            <TextBlock Margin="6,0,0,0" Opacity="0.7" Text="{Binding ChildProcessText, StringFormat=(子プロセス {0} 個)}" />
+                            <Button HorizontalAlignment="Right" Padding="8,1" Content="選択したプロセスを終了"
+                                    Command="{Binding KillProcessCommand}" CommandParameter="{Binding SelectedProcess}" />
+                        </DockPanel>
+                        <DataGrid ItemsSource="{Binding Processes}" SelectedItem="{Binding SelectedProcess}"
+                                  AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                                  GridLinesVisibility="None" RowHeaderWidth="0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="名前" Binding="{Binding DisplayName}" Width="2*" />
+                                <DataGridTextColumn Header="PID" Binding="{Binding Id}" Width="Auto" />
+                                <DataGridTextColumn Header="CPU" Binding="{Binding CpuUsageText}" Width="Auto" />
+                                <DataGridTextColumn Header="メモリ" Binding="{Binding PrivateBytesText}" Width="Auto" />
+                                <DataGridTextColumn Header="スレッド" Binding="{Binding Threads}" Width="Auto" />
+                                <DataGridTextColumn Header="種類" Binding="{Binding Kind}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
                 </Grid>
-            </DockPanel>
-            <DockPanel Grid.Column="2">
-                <DockPanel DockPanel.Dock="Top">
-                    <TextBlock FontWeight="Bold" Text="メモリ (YMM4)" />
+            </TabItem>
+            <TabItem Header="プラグイン">
+                <DockPanel Margin="0,6,0,0">
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+                        <Button DockPanel.Dock="Right" Padding="8,1" Content="ヒープを今すぐ解析" Command="{Binding AnalyzeHeapCommand}" />
+                        <TextBlock VerticalAlignment="Center" Opacity="0.7" TextTrimming="CharacterEllipsis">
+                            <Run Text="{Binding PluginStatusText, Mode=OneWay}" /><Run Text="   " /><Run Text="{Binding HeapStatusText, Mode=OneWay}" />
+                        </TextBlock>
+                    </DockPanel>
+                    <TextBlock DockPanel.Dock="Bottom" Margin="0,4,0,0" Opacity="0.6" TextWrapping="Wrap"
+                               Text="CPUは0.5秒ごとに各スレッドのスタックを調べ、実行中のプラグインに消費時間を割り当てた推定値です。メモリはプラグインのアセンブリで定義された型のインスタンス(配列を含む)の合計です。" />
+                    <DataGrid ItemsSource="{Binding Plugins}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                              CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                              GridLinesVisibility="None" RowHeaderWidth="0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名前" Binding="{Binding Name}" Width="2*" />
+                            <DataGridTextColumn Header="種類" Binding="{Binding Kind}" Width="Auto" />
+                            <DataGridTextColumn Header="CPU" Binding="{Binding CpuUsageText}" SortMemberPath="CpuUsage" Width="Auto" />
+                            <DataGridTextColumn Header="CPU時間" Binding="{Binding CpuTimeText}" SortMemberPath="CpuTime" Width="Auto" />
+                            <DataGridTextColumn Header="メモリ" Binding="{Binding HeapText}" SortMemberPath="HeapBytes" Width="Auto" />
+                            <DataGridTextColumn Header="オブジェクト" Binding="{Binding Objects, StringFormat=N0}" SortMemberPath="Objects" Width="Auto" />
+                            <DataGridTextColumn Header="スレッド" Binding="{Binding Threads}" Width="Auto" />
+                            <DataGridTextColumn Header="DLL" Binding="{Binding Assemblies}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </DockPanel>
-                <TextBlock DockPanel.Dock="Bottom" Opacity="0.7" TextTrimming="CharacterEllipsis" Text="{Binding SystemMemoryText, StringFormat=システム全体 {0}}" />
-                <local:UsageGraph Height="90" Margin="0,2" Values="{Binding MemoryHistory}" Capacity="{Binding GraphCapacity}"
-                                  Maximum="{Binding MemoryGraphMaximum}" Stroke="#FF9B59B6" />
-            </DockPanel>
-        </Grid>
-
-        <Grid Grid.Row="2" Margin="0,8,0,8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource CaptionText}" Text="メモリ" />
-            <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding MemoryText}" />
-            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource CaptionText}" Text="マネージド" />
-            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding ManagedHeapText}" />
-            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource CaptionText}" Text="GC回数" />
-            <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ValueText}" Text="{Binding GcCountText}" />
-            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource CaptionText}" Text="スレッド" />
-            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource ValueText}">
-                <Run Text="{Binding ThreadText, Mode=OneWay}" /><Run Text="  ハンドル " /><Run Text="{Binding HandleText, Mode=OneWay}" />
-            </TextBlock>
-            <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource CaptionText}" Text="稼働時間" />
-            <TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource ValueText}">
-                <Run Text="{Binding UptimeText, Mode=OneWay}" /><Run Text="  DLL " /><Run Text="{Binding AssemblyText, Mode=OneWay}" />
-            </TextBlock>
-        </Grid>
-
-        <DockPanel Grid.Row="3">
-            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,2">
-                <TextBlock FontWeight="Bold" Text="プロセス" />
-                <TextBlock Margin="6,0,0,0" Opacity="0.7" Text="{Binding ChildProcessText, StringFormat=(子プロセス {0} 個)}" />
-                <Button HorizontalAlignment="Right" Padding="8,1" Content="選択したプロセスを終了"
-                        Command="{Binding KillProcessCommand}" CommandParameter="{Binding SelectedProcess}" />
-            </DockPanel>
-            <DataGrid ItemsSource="{Binding Processes}" SelectedItem="{Binding SelectedProcess}"
-                      AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
-                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
-                      GridLinesVisibility="None" RowHeaderWidth="0">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="名前" Binding="{Binding DisplayName}" Width="2*" />
-                    <DataGridTextColumn Header="PID" Binding="{Binding Id}" Width="Auto" />
-                    <DataGridTextColumn Header="CPU" Binding="{Binding CpuUsageText}" Width="Auto" />
-                    <DataGridTextColumn Header="メモリ" Binding="{Binding PrivateBytesText}" Width="Auto" />
-                    <DataGridTextColumn Header="スレッド" Binding="{Binding Threads}" Width="Auto" />
-                    <DataGridTextColumn Header="種類" Binding="{Binding Kind}" Width="*" />
-                </DataGrid.Columns>
-            </DataGrid>
-        </DockPanel>
+            </TabItem>
+            <TabItem Header="GPU">
+                <DockPanel Margin="0,6,0,0">
+                    <Grid DockPanel.Dock="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <DockPanel Grid.Column="0">
+                            <DockPanel DockPanel.Dock="Top">
+                                <TextBlock FontWeight="Bold" Text="GPU (YMM4)" />
+                                <TextBlock HorizontalAlignment="Right" Text="{Binding GpuText}" />
+                            </DockPanel>
+                            <TextBlock DockPanel.Dock="Bottom" Opacity="0.7" Text="{Binding SystemGpuText, StringFormat=システム全体 {0}}" />
+                            <Grid Height="90" Margin="0,2">
+                                <local:UsageGraph Values="{Binding SystemGpuHistory}" Capacity="{Binding GraphCapacity}" Maximum="100" Stroke="#8090A0B0" />
+                                <local:UsageGraph Values="{Binding GpuHistory}" Capacity="{Binding GraphCapacity}" Maximum="100" Stroke="#FF2ECC71" />
+                            </Grid>
+                        </DockPanel>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource CaptionText}" Text="専用GPUメモリ (YMM4)" />
+                            <TextBlock FontSize="16" Text="{Binding GpuDedicatedText}" />
+                            <TextBlock Style="{StaticResource CaptionText}" Margin="0,8,12,2" Text="共有GPUメモリ (YMM4)" />
+                            <TextBlock FontSize="16" Text="{Binding GpuSharedText}" />
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock DockPanel.Dock="Top" Foreground="OrangeRed" TextWrapping="Wrap" Text="{Binding GpuStatusText}" />
+                    <TextBlock DockPanel.Dock="Top" Margin="0,8,0,2" FontWeight="Bold" Text="アダプター" />
+                    <DataGrid DockPanel.Dock="Top" ItemsSource="{Binding GpuAdapters}" AutoGenerateColumns="False" IsReadOnly="True"
+                              HeadersVisibility="Column" GridLinesVisibility="None" RowHeaderWidth="0" CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名前" Binding="{Binding Name}" Width="2*" />
+                            <DataGridTextColumn Header="使用率" Binding="{Binding UtilizationText}" Width="Auto" />
+                            <DataGridTextColumn Header="専用メモリ" Binding="{Binding DedicatedText}" Width="Auto" />
+                            <DataGridTextColumn Header="共有メモリ" Binding="{Binding SharedText}" Width="Auto" />
+                            <DataGridTextColumn Header="YMM4 専用" Binding="{Binding SelfDedicatedText}" Width="Auto" />
+                            <DataGridTextColumn Header="YMM4 共有" Binding="{Binding SelfSharedText}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock DockPanel.Dock="Top" Margin="0,8,0,2" FontWeight="Bold" Text="エンジン" />
+                    <DataGrid ItemsSource="{Binding GpuEngines}" AutoGenerateColumns="False" IsReadOnly="True"
+                              HeadersVisibility="Column" GridLinesVisibility="None" RowHeaderWidth="0" CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="エンジン" Binding="{Binding EngineType}" Width="*" />
+                            <DataGridTextColumn Header="YMM4" Binding="{Binding SelfText}" Width="Auto" />
+                            <DataGridTextColumn Header="システム全体" Binding="{Binding SystemText}" Width="Auto" />
+                            <DataGridTextColumn Header="アダプター" Binding="{Binding Adapter}" Width="2*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>
