@@ -98,5 +98,6 @@ internal sealed class ProcessItemViewModel : Bindable, IDisposable
     }
 
     internal static bool IsProcessAccessException(Exception ex)
-        => ex is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException or ArgumentException;
+        => ex is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException or ArgumentException
+            || (ex is AggregateException aggregate && aggregate.InnerExceptions.All(IsProcessAccessException));
 }
