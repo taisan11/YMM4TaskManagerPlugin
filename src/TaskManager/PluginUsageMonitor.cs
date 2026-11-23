@@ -182,7 +182,7 @@ internal sealed class PluginUsageMonitor(PluginCatalog catalog) : IDisposable
         foreach (var obj in clrHeap.EnumerateObjects())
         {
             var type = obj.Type;
-            if (type is null)
+            if (type is null || obj.IsFree)
                 continue;
             if (!typeGroups.TryGetValue(type.MethodTable, out var group))
             {
