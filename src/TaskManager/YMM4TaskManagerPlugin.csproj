@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- プラグインに便利な設定を読み込む -->
+  <Import Project="../../buildprops/Ymm4Plugin.Build.props" />
+  <PropertyGroup>
+    <AssemblyName>YMM4TaskManagerPlugin</AssemblyName>
+    <RootNamespace>taisan11.TaskManager</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="3.1.512801" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(YMM4_PATH)\Vortice.DXGI.dll">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="$(YMM4_PATH)\Vortice.DirectX.dll">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="$(YMM4_PATH)\SharpGen.Runtime.dll">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="$(YMM4_PATH)\SharpGen.Runtime.COM.dll">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
